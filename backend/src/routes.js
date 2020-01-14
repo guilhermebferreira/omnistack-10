@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const axios = require('axios');
 const routes = Router();
+const Dev = require('./models/Dev');
 
 // Métodos HTTP: GET, POST, PUT, DELETE
 
@@ -11,11 +12,25 @@ const routes = Router();
 
 routes.post('/devs', async (request, response) => {
     console.log(request.body);
-    const { name, avatar_url, bio, github_username, techs} = request.body;
+
+    const { github_username, techs} = request.body;
 
     const apiresponse = await axios.get(`https://api.github.com/users/${github_username}` );
-    console.log(apiresponse.data);
-    return response.json({ message: 'Hello OmniStack' });
+
+    const { name = login, avatar_url, bio} = apiresponse.data;
+
+    console.log(name, avatar_url, bio, techs);
+    const techsArray = techs.split(',').map(tech => tech.trim());
+
+    const dev = await Dev.create({
+        github_username,
+        name,
+        avatar_url,
+        bio,
+        techs: techsArray,
+    });
+
+    return response.json(dev);
 });
 
 module.exports = routes;

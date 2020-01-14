@@ -7,10 +7,10 @@ const app = express();
 
 dotenv.config();
 
-// mongoose.connect('mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PSSWR}@cluster0-elh6i.mongodb.net/test?retryWrites=true&w=majority', {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-// });
+mongoose.connect('mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PSSWR}@cluster0-elh6i.mongodb.net/test?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
 
 app.use(express.json());
 app.use(routes);
