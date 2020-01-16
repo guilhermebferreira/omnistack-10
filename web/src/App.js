@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import api from './services/api'
+
 import './global.css';
 import './App.css';
 import './Sidebar.css';
@@ -6,6 +8,7 @@ import './Main.css';
 
 
 function App() {
+    const [devs, setDevs] = useState([]);
     const [latitude, setLatitude] = useState('');
     const [longitude, setLongitude] = useState('');
     const [github_username, setGithubUsername] = useState('');
@@ -31,18 +34,35 @@ function App() {
 
         ]
     );
-    
+
+    useEffect(() => {
+        async function loadDevs() {
+            const response = await api.get('/devs');
+
+            setDevs(response.data);
+        }
+        loadDevs();
+    },[]);
+
     async function handleAddDev(e) {
         e.preventDefault();
 
-        
+        const response = await api.post('/devs',
+            {
+                github_username,
+                techs,
+                latitude,
+                longitude
+            });
+        setGithubUsername('');
+        setTechs('');
     }
 
     return (
         <div id="app">
             <aside>
                 <strong>Cadastrar</strong>
-                <form>
+                <form onSubmit={handleAddDev}>
                     <div className="input-block">
                         <label htmlFor="github_username">Usuário do Github</label>
                         <input
@@ -50,12 +70,7 @@ function App() {
                             id="github_username"
                             required
                             value={github_username}
-                            onChange={e=>setGithubUsername(e.target.value)}
-
-
-                            Assistir mais tarde
-
-                            Compartilhar
+                            onChange={e => setGithubUsername(e.target.value)}
                         />
                     </div>
                     <div className="input-block">
@@ -65,7 +80,7 @@ function App() {
                             id="techs"
                             required
                             value={techs}
-                            onChange={e=>setTechs(e.target.value)}
+                            onChange={e => setTechs(e.target.value)}
                         />
                     </div>
                     <div className="input-group">
@@ -77,7 +92,7 @@ function App() {
                                 id="latitude"
                                 required
                                 value={latitude}
-                                onChange={e=>setLatitude(e.target.value)}
+                                onChange={e => setLatitude(e.target.value)}
                             />
                         </div>
                         <div className="input-block">
@@ -88,7 +103,7 @@ function App() {
                                 id="longitude"
                                 required
                                 value={longitude}
-                                onChange={e=>setLongitude(e.target.value)}
+                                onChange={e => setLongitude(e.target.value)}
                             />
                         </div>
                     </div>
@@ -97,45 +112,22 @@ function App() {
             </aside>
             <main>
                 <ul>
-                    <li className="dev-item">
-                        <header>
-                            <img src="https://avatars0.githubusercontent.com/u/5393392?s=460&v=4"
-                                 alt="Guilherme Ferreira"/>
-                            <div className="user-info">
-                                <strong>Guilherme Ferreira</strong>
-                                <span>PHP, Python</span>
-                            </div>
+                    {devs.map( dev => (
+                        <li key={dev.id} className="dev-item">
+                            <header>
+                                <img src={dev.avatar_url}
+                                     alt={dev.name}/>
+                                <div className="user-info">
+                                    <strong>{dev.name}</strong>
+                                    <span>{dev.techs.join(', ')}</span>
+                                </div>
 
-                        </header>
-                        <p>Fullstack Developer</p>
-                        <a href="https://github.com/guilhermebferreira">Acessar perfil no Github</a>
-                    </li>
-                    <li className="dev-item">
-                        <header>
-                            <img src="https://avatars0.githubusercontent.com/u/5393392?s=460&v=4"
-                                 alt="Guilherme Ferreira"/>
-                            <div className="user-info">
-                                <strong>Guilherme Ferreira</strong>
-                                <span>PHP, Python</span>
-                            </div>
+                            </header>
+                            <p>{dev.bio}</p>
+                            <a href={`https://github.com/${dev.github_username}`}>Acessar perfil no Github</a>
+                        </li>
+                    ))}
 
-                        </header>
-                        <p>Fullstack Developer</p>
-                        <a href="https://github.com/guilhermebferreira">Acessar perfil no Github</a>
-                    </li>
-                    <li className="dev-item">
-                        <header>
-                            <img src="https://avatars0.githubusercontent.com/u/5393392?s=460&v=4"
-                                 alt="Guilherme Ferreira"/>
-                            <div className="user-info">
-                                <strong>Guilherme Ferreira</strong>
-                                <span>PHP, Python</span>
-                            </div>
-
-                        </header>
-                        <p>Fullstack Developer</p>
-                        <a href="https://github.com/guilhermebferreira">Acessar perfil no Github</a>
-                    </li>
                 </ul>
             </main>
         </div>
