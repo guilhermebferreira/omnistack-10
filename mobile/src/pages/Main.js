@@ -1,19 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Image, View, Text, TextInput, TouchableOpacity} from 'react-native';
 import MapView, {Marker, Callout} from "react-native-maps";
-import {requestPermissionsAsync, getCurrentPositionAsync } from "expo-location";
+import {requestPermissionsAsync, getCurrentPositionAsync} from "expo-location";
 import {MaterialIcons} from '@expo/vector-icons'
 
 import api from "../services/api";
+import socket from "../services/socket";
 
 function Main({navigation}) {
     const [devs, setDevs] = useState([]);
     const [currentRegion, setCurrentRegion] = useState(null);
     const [techs, setTechs] = useState('')
-    useEffect(()=>{
+    useEffect(() => {
         async function loadInitialPosition() {
             const {granted} = await requestPermissionsAsync();
-            if(granted){
+            if (granted) {
                 const {coords} = await getCurrentPositionAsync({
                     enableHighAccuracy: true,
                 });
@@ -23,18 +24,19 @@ function Main({navigation}) {
                     latitude,
                     longitude,
                     latitudeDelta: 0.04,
-                    longitudeDelta:0.04,
+                    longitudeDelta: 0.04,
                 });
 
             }
         }
+
         loadInitialPosition();
     }, []);
 
     async function loadDevs() {
         const {latitude, longitude} = currentRegion;
         const response = await api.get('/search', {
-            params:{
+            params: {
                 latitude,
                 longitude,
                 techs
@@ -42,15 +44,19 @@ function Main({navigation}) {
         });
         console.log(response.data);
         setDevs(response.data.devs);
-
+        setupWebsocket();
     }
-    
+
+    function setupWebsocket() {
+        socket.connect();
+    }
+
     function handleRegionChanged(region) {
         console.log(region)
         setCurrentRegion(region);
     }
 
-    if(!currentRegion){
+    if (!currentRegion) {
         return null;
     }
     return (
@@ -73,9 +79,9 @@ function Main({navigation}) {
                             style={styles.avatar}
                             source={{uri: dev.avatar_url}}
                         />
-                        <Callout onPress={()=>{
+                        <Callout onPress={() => {
                             // navegação
-                            navigation.navigate('Profile', {github_username:dev.github_username})
+                            navigation.navigate('Profile', {github_username: dev.github_username})
                         }}>
                             <View style={styles.callout}>
                                 <Text style={styles.devName}>{dev.name}</Text>
@@ -87,7 +93,7 @@ function Main({navigation}) {
                 ))}
 
 
-        </MapView>
+            </MapView>
             <View style={styles.searchForm}>
                 <TextInput
                     style={styles.searchInput}
@@ -96,10 +102,9 @@ function Main({navigation}) {
                     autoCapitalize="words"
                     autoCorret={false}
                     value={techs}
-                    onChangeText = {setTechs}
+                    onChangeText={setTechs}
                     /*same of{text => setTechs(text)}*/
                 />
-
 
 
                 <TouchableOpacity
@@ -117,12 +122,12 @@ const styles = StyleSheet.create({
     map: {
         flex: 1
     },
-    avatar:{
+    avatar: {
         width: 54,
         height: 54,
         borderWidth: 4,
         borderRadius: 4,
-        borderColor:'#fff'
+        borderColor: '#fff'
     },
     callout: {
         width: 260,
@@ -131,26 +136,26 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
-    devBio:{
+    devBio: {
         color: '#666',
-        marginTop:5,
+        marginTop: 5,
     },
-    devTechs:{
+    devTechs: {
 
-        marginTop:5,
+        marginTop: 5,
     },
-    searchForm:{
-        position:'absolute',
+    searchForm: {
+        position: 'absolute',
         top: 20,
         left: 20,
         right: 20,
         zIndex: 5,
         flexDirection: 'row' // display flex padrão do react native
     },
-    searchInput:{
+    searchInput: {
         flex: 1,
         height: 50,
-        backgroundColor:'#fff',
+        backgroundColor: '#fff',
         color: '#333',
         borderRadius: 25,
         paddingHorizontal: 20,
@@ -158,15 +163,15 @@ const styles = StyleSheet.create({
         //propriedades de sombra para o iOS
         shadowColor: '#000',
         shadowOpacity: 0.2,
-        shadowOffset:{
+        shadowOffset: {
             width: 6,
-            height:6,
+            height: 6,
         },
         //propriedade de sombra para o android
         elevation: 2,
     },
-    loadButton:{
-        width:50,
+    loadButton: {
+        width: 50,
         height: 50,
         backgroundColor: '#8e4dff',
         borderRadius: 25,
